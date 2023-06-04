@@ -1,10 +1,13 @@
 from sys import *
 from pygame import *
-from settings import *
-from ship import *
+from settings import Setting
+from ship import Ship
 from function import *
-from bullet import *
+from bullet import Bullet
 from pygame.sprite import Group
+from alien import Alien
+from stats import GameStats
+from buttons import Button
 
 def run_game():
     init()
@@ -15,18 +18,30 @@ def run_game():
 
     ship = Ship(screen)
 
+    aliens = Group()
+
     bullets = Group()
 
+    create_fleet(setting, screen, ship, aliens)
+
+    stats = GameStats(setting)
+
+    play_button = Button(setting, screen, "Play")
+    pbr = play_button.rect
+
     while True:
-        check_events(ship, setting, screen, bullets)
-        ship.update()
-        bullets.update()
+        check_events(setting, screen, stats, play_button, ship, aliens, bullets, pbr)
+        if stats.game_active:
+            ship.update()
+            bullets.update()
+            update_bullets(aliens, bullets, setting, screen, ship)
+            update_aliens(aliens, setting, ship, stats, screen, bullets)
 
         for bullet in bullets.copy():
             if bullet.rect.bottom <= 0:
                 bullets.remove(bullet)
 
-        update_screen(screen, ship, setting, bullets)
+        update_screen(setting, screen, stats, ship, aliens, bullets, play_button)
         display.flip()
 
 run_game()
